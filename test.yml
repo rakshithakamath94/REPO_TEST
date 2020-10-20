@@ -1,0 +1,82 @@
+- job:
+    name: gh_centos7-regression
+    node: centos7
+    description: Our production regression test.  Triggerered for each Gerrit CR revision.
+    project-type: freestyle
+    concurrent: true
+
+    scm:
+    - glusterfs
+
+    properties:
+    - github:
+        url: https://github.com/gluster/glusterfs
+    - discard-after-x:
+        x: 90
+    - one-build-per-node
+
+    triggers:
+    - github-pull-request:
+        cancel-builds-on-update: true
+        allow-whitelist-orgs-as-admins: true
+        admin-list:
+          - csabahenk
+          - itisravi
+          - thotz
+          - rafikc30
+          - aravindavk
+          - kalebskeithley
+          - nixpanic
+          - pranithk
+          - raghavendrabhat
+          - amarts
+          - raghavendra-talur
+          - xhernandez
+          - anoopcs9
+          - soumyakoduri
+          - kotreshhr
+          - Sheetalpamecha
+          - mohit84
+          - BarakSason
+          - sunnyku
+          - sanjurakonde
+          - tshacked
+          - VHariharmath-rh
+          - deepshikhaaa
+          - mscherer
+          - jdarcy
+          - nigelbabu
+          - prashanthpai
+          - vbellur
+          - raghavendrahg
+          - KritikaDhananjay
+          - humblec
+          - poornimag
+          - ShyamsundarR
+          - spalai
+          - atinmu
+          - mchangir
+          - nbalacha
+        github-hooks: true
+        only-trigger-phrase: true
+        trigger-phrase: '/run regression'
+        status-context: "Testing: regression test suite"
+        started-status: "Running: regression test suite"
+        success-status: "OK - No regression"
+        failure-status: "FAIL - please fix for merge"
+        comment-file: gluster_regression.txt
+
+
+    publishers:
+    - post-tasks:
+        - matches:
+            - log-text: Build was aborted
+          script: !include-raw: ../scripts/regression-abort.sh
+    - gluster-logs
+
+    parameters:
+    - string:
+        name: sha1
+        default: devel
+        description: "A pull request ID, like 'origin/pr/72/head'"
+
